@@ -2,17 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
+[DisallowMultipleComponent]
 public class Player : MonoBehaviour{
 
-	public float upForce = 50;
+	[SerializeField]private float upForce = 50;
 
-	public float  rotValue = 5;
+	[SerializeField]private float  rotValue = 5;
 
-	public float reactive = 0.03f;
+	[Range(0.0f,1.0f)][SerializeField]private float reactive = 0.03f;
 	
 	
-	public float maxSpeed = 10;
+	[SerializeField]private float maxSpeed = 10;
+
+
+	[SerializeField] private GameObject deathParticles;
 	
 	// Use this for initialization
 	void Start (){
@@ -76,8 +79,8 @@ public class Player : MonoBehaviour{
 	}
 	
 	
-	// Update is called once per frame
-	private void Update(){
+	// using fixedUpdate
+	private void FixedUpdate(){
 		
 		thurst();
 		rotate();
@@ -124,22 +127,37 @@ public class Player : MonoBehaviour{
 		else if (other.gameObject.layer == LayerMask.NameToLayer("Obstacle")){
 			
 			Debug.Log("collided with obastacle");
-//			Utils.LoadCurrentScene();
-		
-			killPlayer(5);
+
+
+			StartCoroutine(_killPlayer(5));
+			
+			
 		}
 		
 	}
 
-	void killPlayer(float seconds){
+	IEnumerator _killPlayer(float seconds){
 
 
-		float currentTime = Time.time;
-		//todo continue here
-//		while (Time.time < currentTime +seconds){
-//			
-//			
-//		}
+		float currentTime = 0;
+
+
+		ParticleSystem dp = deathParticles.GetComponent<ParticleSystem>();
+		
+		dp.Play();
+		while (currentTime < seconds){
+	
+			Debug.Log("here in kill");
+			currentTime += Time.deltaTime;
+			
+			yield return null;
+			
+		}
+		
+		dp.Stop();
+		
+		Utils.LoadCurrentScene();
+
 	}
 	
 	
